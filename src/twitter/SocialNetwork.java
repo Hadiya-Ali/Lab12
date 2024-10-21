@@ -3,6 +3,9 @@
  */
 package twitter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +31,7 @@ public class SocialNetwork {
     /**
      * Guess who might follow whom, from evidence found in tweets.
      * 
-     * @param tweets
+     * @param testingTweets
      *            a list of tweets providing the evidence, not modified by this
      *            method.
      * @return a social network (as defined above) in which Ernie follows Bert
@@ -40,9 +43,37 @@ public class SocialNetwork {
      *         All the Twitter usernames in the returned social network must be
      *         either authors or @-mentions in the list of tweets.
      */
-    public static Map<String, Set<String>> guessFollowsGraph(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
-    }
+	//implementing the guessfolloesgraph
+    public static Map<String, Set<String>> guessFollowsGraph(List<Tweet> testingTweets) {
+    	 Map<String, Set<String>> f_Graph = new HashMap<>();
+
+    	    for (Tweet t : testingTweets) {
+    	        String Theauthor = t.getAuthor().toLowerCase();
+    	        f_Graph.putIfAbsent(Theauthor, new HashSet<>());
+    	        
+
+    	       
+    	        Set<String> Users = new HashSet<>();
+    	        String details = t.getText();
+    	        String[] words = details.split("\\s+");
+    	        //checking the mentioned users
+    	        for (String word : words) {
+    	            if (word.startsWith("@")) {
+    	                String un = word.substring(1).toLowerCase(); 
+    	                Users.add(un);
+    	            }
+    	        }
+
+    	       
+    	        for (String using : Users) {
+    	        	f_Graph.putIfAbsent(using, new HashSet<>());
+    	        	f_Graph.get(Theauthor).add(using);
+    	        }
+    	    }
+
+    	    return f_Graph;
+    	}
+    
 
     /**
      * Find the people in a social network who have the greatest influence, in
@@ -53,8 +84,22 @@ public class SocialNetwork {
      * @return a list of all distinct Twitter usernames in followsGraph, in
      *         descending order of follower count.
      */
+    
+    //making influencers function
     public static List<String> influencers(Map<String, Set<String>> followsGraph) {
-        throw new RuntimeException("not implemented");
+        Map<String, Integer> fcs = new HashMap<>();
+
+                for (Set<String> f_Users : followsGraph.values()) {
+            for (String user : f_Users) {
+            	fcs.put(user, fcs.getOrDefault(user, 0) + 1);
+            }
+        }
+
+       //we sort the influencers
+        List<String> influencers = new ArrayList<>(fcs.keySet());
+        influencers.sort((first, second) -> fcs.get(second) - fcs.get(first));
+
+        return influencers;
     }
 
 }
